@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday Болорсарнай!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        /* CSS Variables */
+        :root {
+            --primary: #ff6b6b;
+            --secondary: #fca048;
+            --bg-top: #2b1055;
+            --bg-bottom: #7597de;
+            --text-light: #ffffff;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to bottom, var(--bg-top), var(--bg-bottom));
+            min-height: 100vh;
+            color: var(--text-light);
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Canvas for Confetti */
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        /* Layout Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Header & Typography */
+        header {
+            text-align: center;
+            margin-bottom: 4rem;
+            animation: fadeInDown 1.5s ease-out;
+        }
+
+        .subtitle {
+            font-size: 1.5rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #ffd700;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 10px rgba(255, 215, 0, 0.5);
+        }
+
+        h1 {
+            font-family: 'Dancing Script', cursive;
+            font-size: 5rem;
+            line-height: 1.2;
+            background: linear-gradient(to right, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 15px rgba(255, 154, 158, 0.6));
+            margin-bottom: 1rem;
+        }
+
+        .name {
+            font-size: 4rem;
+            font-weight: 600;
+            color: #fff;
+            text-shadow: 0 0 10px #ff6b6b, 0 0 20px #ff6b6b, 0 0 40px #ff6b6b;
+            animation: pulseGlow 2s infinite alternate;
+        }
+
+        /* Photo Gallery - Polaroid Style */
+        .gallery-title {
+            font-family: 'Dancing Script', cursive;
+            font-size: 3rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .gallery {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 5rem;
+        }
+
+        .polaroid {
+            background: #fff;
+            padding: 15px 15px 40px 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            border-radius: 4px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            width: 250px;
+            position: relative;
+        }
+
+        /* Alternating rotations for a scattered look */
+        .polaroid:nth-child(even) { transform: rotate(5deg); }
+        .polaroid:nth-child(odd) { transform: rotate(-5deg); }
+        .polaroid:nth-child(3n) { transform: rotate(2deg); }
+
+        .polaroid:hover {
+            transform: scale(1.15) rotate(0deg);
+            z-index: 20;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        .polaroid img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            background-color: #eee; /* Placeholder background */
+            border: 1px solid #ddd;
+        }
+
+        .polaroid .caption {
+            color: #333;
+            text-align: center;
+            font-family: 'Dancing Script', cursive;
+            font-size: 1.5rem;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        /* Interactive Surprise Section */
+        .surprise-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 4rem;
+        }
+
+        .btn-surprise {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.5rem;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            color: white;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(255, 107, 107, 0.4);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-surprise:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 25px rgba(255, 107, 107, 0.6);
+        }
+
+        .btn-surprise:active {
+            transform: translateY(2px);
+        }
+
+        /* Interactive Envelope/Message */
+        .envelope-wrapper {
+            margin-top: 3rem;
+            width: 300px;
+            height: 200px;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .envelope-wrapper:hover {
+            transform: translateY(-10px);
+        }
+
+        .envelope {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: #d35400;
+            border-radius: 5px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+        }
+
+        .envelope::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            border-right: 150px solid transparent;
+            border-bottom: 100px solid transparent;
+            border-top: 100px solid #e67e22;
+            border-left: 150px solid #e67e22;
+            z-index: 3;
+            border-radius: 5px 0 0 5px;
+        }
+
+        .envelope::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            border-left: 150px solid transparent;
+            border-bottom: 100px solid transparent;
+            border-top: 100px solid #e67e22;
+            border-right: 150px solid #e67e22;
+            z-index: 3;
+            border-radius: 0 5px 5px 0;
+        }
+
+        .envelope-flap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            border-left: 150px solid transparent;
+            border-right: 150px solid transparent;
+            border-top: 100px solid #f39c12;
+            z-index: 4;
+            transform-origin: top;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .letter {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 280px;
+            height: 180px;
+            background: #fff;
+            z-index: 2;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            color: #333;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .letter h3 {
+            font-family: 'Dancing Script', cursive;
+            color: #e74c3c;
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .letter p {
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        /* Open State */
+        .envelope-wrapper.open .envelope-flap {
+            transform: rotateX(180deg);
+            z-index: 1;
+        }
+
+        .envelope-wrapper.open .letter {
+            transform: translate(-50%, -100px);
+            z-index: 5;
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulseGlow {
+            from { text-shadow: 0 0 10px #ff6b6b, 0 0 20px #ff6b6b, 0 0 30px #ff6b6b; }
+            to { text-shadow: 0 0 20px #ff6b6b, 0 0 30px #ff6b6b, 0 0 50px #ff6b6b, 0 0 70px #ff6b6b; }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 { font-size: 3.5rem; }
+            .name { font-size: 2.5rem; }
+            .polaroid { width: 45%; }
+        }
+        @media (max-width: 480px) {
+            .polaroid { width: 100%; max-width: 280px; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Canvas for Confetti -->
+    <canvas id="confetti-canvas"></canvas>
+
+    <div class="container">
+        
+        <!-- Header Section -->
+        <header>
+            <div class="subtitle">Төрсөн өдрийн мэнд хүргэе!</div>
+            <h1>Happy Birthday</h1>
+            <div class="name">Болорсарнай</div>
+        </header>
+
+        <!-- Interactive Surprise Button -->
+        <div class="surprise-section">
+            <button class="btn-surprise" onclick="triggerMassiveConfetti()">
+                ✨ Click for a Surprise! ✨
+            </button>
+
+            <!-- Interactive Envelope -->
+            <div class="envelope-wrapper" onclick="toggleEnvelope(this)">
+                <div class="envelope-flap"></div>
+                <div class="envelope"></div>
+                <div class="letter">
+                    <h3>Dear Болорсарнай,</h3>
+                    <p>хамгийн хөөрхөн охинд төрсөн өдөрийн мэнд дандаа инээж яварай ❤️</p>
+                </div>
+            </div>
+            <p style="margin-top: 15px; font-size: 0.9rem; opacity: 0.8;">(Tap the envelope to open)</p>
+        </div>
+
+        <!-- Photo Gallery Section -->
+        <h2 class="gallery-title">Special Memories</h2>
+        <div class="gallery">
+            
+            <!-- Photo 1 -->
+            <div class="polaroid">
+                <!-- REPLACE THE SRC ATTRIBUTE BELOW WITH YOUR PHOTO URL -->
+                <!-- Example: src="images/photo1.jpg" -->
+                <img src="/imega/1.jpg" alt="Placeholder">
+                <div class="caption">Good Times</div>
+            </div>
+
+            <!-- Photo 2 -->
+            <div class="polaroid">
+                <!-- REPLACE THE SRC ATTRIBUTE BELOW WITH YOUR PHOTO URL -->
+                <img src="/imega/2.jpg" alt="Placeholder">
+                <div class="caption">уух дуртай охин хха</div>
+            </div>
+
+            <!-- Photo 3 -->
+            <div class="polaroid">
+                <!-- REPLACE THE SRC ATTRIBUTE BELOW WITH YOUR PHOTO URL -->
+                <img src="/imega/5.jpg" alt="Placeholder">
+                <div class="caption">хөөрхөн </div>
+            </div>
+
+            <!-- Photo 4 -->
+            <div class="polaroid">
+                <!-- REPLACE THE SRC ATTRIBUTE BELOW WITH YOUR PHOTO URL -->
+                <img src="/imega/4.jpg" alt="Placeholder">
+                <div class="caption">❤️</div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- JavaScript Features -->
+    <script>
+        // --- INTERACTIVE ENVELOPE ---
+        function toggleEnvelope(element) {
+            element.classList.toggle('open');
+            // Add a little pop of confetti when opening the envelope
+            if(element.classList.contains('open')) {
+                fireConfettiBurst();
+            }
+        }
+
+        // --- CONFETTI SYSTEM ---
+        const canvas = document.getElementById('confetti-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let w = canvas.width = window.innerWidth;
+        let h = canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            w = canvas.width = window.innerWidth;
+            h = canvas.height = window.innerHeight;
+        });
+
+        const colors = [
+            '#ff6b6b', '#fca048', '#ffd700', '#4ecdc4', '#a8e6cf', '#ff9a9e'
+        ];
+
+        class Particle {
+            constructor(x, y, isExplosion = false) {
+                this.x = x || Math.random() * w;
+                this.y = y || (isExplosion ? h : Math.random() * h - h);
+                this.r = Math.random() * 6 + 4; // size
+                this.dx = isExplosion ? (Math.random() - 0.5) * 20 : Math.random() * 2 - 1;
+                this.dy = isExplosion ? (Math.random() - 1) * 20 : Math.random() * 3 + 2;
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+                this.tilt = Math.floor(Math.random() * 10) - 10;
+                this.tiltAngleInc = (Math.random() * 0.07) + 0.05;
+                this.tiltAngle = 0;
+            }
+
+            update() {
+                this.tiltAngle += this.tiltAngleInc;
+                this.y += this.dy;
+                this.x += this.dx;
+                this.dy += 0.05; // gravity
+
+                // Add sway
+                this.x += Math.sin(this.tiltAngle) * 0.5;
+
+                // Reset if falls off screen (only for continuous, not explosions)
+                if (this.y > h + 20 || this.x > w + 20 || this.x < -20) {
+                    if(particles.length < 150) { // Keep steady background rain limit
+                        this.x = Math.random() * w;
+                        this.y = -20;
+                        this.dy = Math.random() * 3 + 2;
+                        this.dx = Math.random() * 2 - 1;
+                    }
+                }
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.lineWidth = this.r;
+                ctx.strokeStyle = this.color;
+                ctx.moveTo(this.x + this.tilt + this.r, this.y);
+                ctx.lineTo(this.x + this.tilt, this.y + this.tilt + this.r);
+                ctx.stroke();
+            }
+        }
+
+        // Animation Loop
+        function animate() {
+            requestAnimationFrame(animate);
+            ctx.clearRect(0, 0, w, h);
+            
+            // Remove fallen explosion particles to prevent lag
+            particles = particles.filter(p => p.y < h + 50);
+
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+        }
+
+        // Start continuous gentle background confetti
+        function initBackgroundConfetti() {
+            for (let i = 0; i < 50; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        // Button trigger for big explosion
+        function triggerMassiveConfetti() {
+            const centerX = w / 2;
+            const centerY = h / 2;
+            
+            // Burst from bottom
+            for (let i = 0; i < 150; i++) {
+                particles.push(new Particle(w / 2, h, true));
+            }
+            
+            // Burst from sides
+            for(let i=0; i < 50; i++) {
+                let p1 = new Particle(0, centerY, true);
+                p1.dx = Math.random() * 15; // Shoot right
+                particles.push(p1);
+
+                let p2 = new Particle(w, centerY, true);
+                p2.dx = Math.random() * -15; // Shoot left
+                particles.push(p2);
+            }
+        }
+
+        // Small burst for the envelope
+        function fireConfettiBurst() {
+            for (let i = 0; i < 60; i++) {
+                particles.push(new Particle(w/2, h - 200, true));
+            }
+        }
+
+        // Start everything
+        initBackgroundConfetti();
+        animate();
+
+    </script>
+</body>
+</html>
